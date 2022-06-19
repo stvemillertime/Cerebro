@@ -1,6 +1,6 @@
 # Cerebro
 
-! Note ! This is a duplication of a previous project https://github.com/stairwell-inc/threat-research/tree/main/cerebro-string-mutations.
+! Note ! This is a (slightly enhanced) project based on previous work here https://github.com/stairwell-inc/threat-research/tree/main/cerebro-string-mutations.
 
 **Cerebro** is a collection of scripts and lists to help you brute force YARA friendly string mutations.
 
