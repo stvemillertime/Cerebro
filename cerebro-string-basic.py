@@ -167,6 +167,20 @@ def make_hex_encoded_strings(thing):
     except:       
         print("Uh oh, something bad happened in hex encoding func.")
 
+def make_dec_encoded_strings(thing):
+    try:
+        if isinstance(thing,str):
+            s = thing
+            t = " "
+            dec_list = []
+            for i in s:
+                dec_not = ord(i)
+                dec_list.append(dec_not)
+            stringed_list = t.join(str(e) for e in dec_list)
+            return(stringed_list)
+    except:       
+        print("Uh oh, something bad happened in decimal encoding func.")
+
 def make_fallchill_strings(thing):
     # Lifted from https://lifars.com/wp-content/uploads/2021/09/Lazarus.pdf
     try:
@@ -248,7 +262,7 @@ def main_active(args = sys.argv[1:]):
     group.add_argument('-s','--str', type=str, help='Single string to mutate.')
    
     # Mutation selection choices.
-    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','reverse','stackpush','stackpushnull','stackpushdoublenull','hex','fallchill','all','frenchstack'], type=str, required=True)
+    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','reverse','stackpush','stackpushnull','stackpushdoublenull','hex','decimal','fallchill','all','frenchstack'], type=str, required=True)
 
     args = parser.parse_args(args)
 
@@ -290,6 +304,10 @@ def main_active(args = sys.argv[1:]):
                     mut_type = "_hex_enc_str"
                     mutated_str = make_hex_encoded_strings(in_string)
                     assemble_output(clean_str,mut_type,mutated_str)
+                elif mutation == "decimal":
+                    mut_type = "_decimal"
+                    mutated_str = make_dec_encoded_strings(in_string)
+                    assemble_output(clean_str,mut_type,mutated_str)
                 elif mutation == "frenchstack":
                     make_frenchstack_strings(in_string) #thank you @notareverser!
                 elif mutation == "all": #everything but frenchstack
@@ -297,13 +315,14 @@ def main_active(args = sys.argv[1:]):
                             make_flipflop_strings(in_string),
                             make_reverse_strings(in_string),
                             make_hex_encoded_strings(in_string),
+                            make_dec_encoded_strings(in_string),
                             make_fallchill_strings(in_string),
                             make_stackpush_strings(in_string),
                             make_stackpush_nullterm(in_string),
                             make_stackpush_doublenullterm(in_string)
                             #,make_frenchstack_strings(in_string)
                     ]
-                    mut_types = ["_flipflop","_reverse","_hex_enc_str","_fallchill","_stackpush","_stackpushnull","_stackpushdoublenull"]
+                    mut_types = ["_flipflop","_reverse","_hex_enc_str","_decimal","_fallchill","_stackpush","_stackpushnull","_stackpushdoublenull"]
                     i = 0
                     for f in funcs:
                         mut_type = mut_types[i]
