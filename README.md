@@ -70,16 +70,17 @@ steve@CFO-MBP % python cerebro-file-basic.py --mutation flipflop --file common_w
 ## Cerebro String Usage Example
 
 ```
+steve:~$ python cerebro-string-basic.py -s kernel32.dll --mut all
 
-CTO-MBP\steve >> python3 cerebro-string-basic.py -s netapi32.dll -m all
-
-        $netapi32dll_flipflop = "enatip23d.ll" nocase
-        $netapi32dll_reverse = "lld.23ipaten" nocase
-        $netapi32dll_hex_enc_str = "6e657461706933322e646c6c" nocase
-        $netapi32dll_fallchill = "mvgakr32.woo" nocase
-        $netapi32dll_stackpush = "h.dllhpi32hneta" nocase
-        $netapi32dll_stackpushnull = "h.dll\x00hpi32hneta"
-        $netapi32dll_stackpushdoublenull = "h.dll\x00\x00hpi32hneta"
+        $kernel32dll_flipflop = "eknrle23d.ll" nocase
+        $kernel32dll_reverse = "lld.23lenrek" nocase
+        $kernel32dll_hex_enc_str = "6b65726e656c33322e646c6c" nocase
+        $kernel32dll_decimal = "107 101 114 110 101 108 51 50 46 100 108 108" nocase
+        $kernel32dll_fallchill = "pvimvo32.woo" nocase
+        $kernel32dll_stackpush = "h.dllhel32hkern" nocase
+        $kernel32dll_stackpushnull = "h.dll\x00hel32hkern" nocase
+        $kernel32dll_stackpushdoublenull = "h.dll\x00\x00hel32hkern" nocase
+        $kernel32dll_hex_movebp = {c645??6bc645??65c645??72c645??6ec645??65c645??6cc645??33c645??32c645??2ec645??64c645??6cc645??6c}
 ```
 
 
