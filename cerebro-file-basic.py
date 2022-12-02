@@ -92,6 +92,21 @@ def make_fallchill_strings(thing):
     except:       
         print("Is that a real string? Something bad happened in fallchill func.")
 
+def make_hex_mov_epb(thing):
+    try:
+        if isinstance(thing,str):
+            s = thing.encode('utf-8')
+            r = ""
+            thing_hex = r.join(s.hex())
+            t = "c645??"
+            movd = ""
+            for x in range(0, len(thing_hex),2):
+                movd += t
+                movd += thing_hex[x:x+2]
+            return(movd)
+    except:       
+        print("Uh oh, something bad happened in mov epb func.")
+
 # Add additional custom mutation functions ^ do things like reverse strings in diff formats, camel case, custom b64, b62, etc etc. 
 
 
@@ -117,7 +132,7 @@ def main_active(args = sys.argv[1:]):
     group.add_argument('-f','--file', type=argparse.FileType('r'), help='Single file to read.')
    
     #Mutation selection choices.
-    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','stackpush','reverse','fallchill','hex', 'decimal'], type=str, required=True)
+    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','stackpush','reverse','fallchill','hex', 'decimal','movebp'], type=str, required=True)
 
     args = parser.parse_args(args)
 
@@ -176,6 +191,15 @@ def main_active(args = sys.argv[1:]):
                 for line in args.file:
                     in_string = line.strip()
                     mutated_str = make_dec_encoded_strings(in_string)
+                    clean_str = re.sub('\W+','',line.strip())
+                    assemble_output(clean_str,mut_type,mutated_str)
+                    count +=1
+            elif mutation == "movebp":
+                mut_type = "_hex_movebp"
+                count = 0
+                for line in args.file:
+                    in_string = line.strip()
+                    mutated_str = make_hex_mov_epb(in_string)
                     clean_str = re.sub('\W+','',line.strip())
                     assemble_output(clean_str,mut_type,mutated_str)
                     count +=1

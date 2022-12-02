@@ -236,6 +236,21 @@ def make_stackpush_doublenullterm(thing):
     except:
         print("Uh oh, something bad happened in stackpush_nullterm func.")
 
+def make_hex_mov_epb(thing):
+    try:
+        if isinstance(thing,str):
+            s = thing.encode('utf-8')
+            r = ""
+            thing_hex = r.join(s.hex())
+            t = "c645??"
+            movd = ""
+            for x in range(0, len(thing_hex),2):
+                movd += t
+                movd += thing_hex[x:x+2]
+            return(movd)
+    except:       
+        print("Uh oh, something bad happened in mov epb func.")
+
 # Add additional custom mutation functions ^ do things like reverse strings in diff formats, camel case, custom b64, b62, etc etc. 
 
 
@@ -243,7 +258,7 @@ def assemble_output(clean_str,mut_type,mutated_str):
     # Use this function to change how you prefer things to be formatted in the output. 
     # If you're feeling spunky maybe do a couple of versions, nocase ascii wide, xor, base64 base64 wide and so forth.
     if "\\x00" in mutated_str:
-        print("\t$" + clean_str + mut_type + " = \"" + mutated_str + "\"")
+        print("\t$" + clean_str + mut_type + " = \"" + mutated_str + "\" nocase")
     elif "_hex_" in mut_type and not "_hex_enc_str" in mut_type:
         print("\t$" + clean_str + mut_type + " = {" + mutated_str + "}")
     else: 
@@ -262,7 +277,7 @@ def main_active(args = sys.argv[1:]):
     group.add_argument('-s','--str', type=str, help='Single string to mutate.')
    
     # Mutation selection choices.
-    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','reverse','stackpush','stackpushnull','stackpushdoublenull','hex','decimal','fallchill','all','frenchstack'], type=str, required=True)
+    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','reverse','stackpush','stackpushnull','stackpushdoublenull','hex','decimal','movebp','fallchill','all','frenchstack'], type=str, required=True)
 
     args = parser.parse_args(args)
 
@@ -308,6 +323,10 @@ def main_active(args = sys.argv[1:]):
                     mut_type = "_decimal"
                     mutated_str = make_dec_encoded_strings(in_string)
                     assemble_output(clean_str,mut_type,mutated_str)
+                elif mutation == "movebp":
+                    mut_type = "_hex_movebp"
+                    mutated_str = make_hex_mov_epb(in_string)
+                    assemble_output(clean_str,mut_type,mutated_str)
                 elif mutation == "frenchstack":
                     make_frenchstack_strings(in_string) #thank you @notareverser!
                 elif mutation == "all": #everything but frenchstack
@@ -319,10 +338,11 @@ def main_active(args = sys.argv[1:]):
                             make_fallchill_strings(in_string),
                             make_stackpush_strings(in_string),
                             make_stackpush_nullterm(in_string),
-                            make_stackpush_doublenullterm(in_string)
+                            make_stackpush_doublenullterm(in_string),
+                            make_hex_mov_epb(in_string)
                             #,make_frenchstack_strings(in_string)
                     ]
-                    mut_types = ["_flipflop","_reverse","_hex_enc_str","_decimal","_fallchill","_stackpush","_stackpushnull","_stackpushdoublenull"]
+                    mut_types = ["_flipflop","_reverse","_hex_enc_str","_decimal","_fallchill","_stackpush","_stackpushnull","_stackpushdoublenull","_hex_movebp"]
                     i = 0
                     for f in funcs:
                         mut_type = mut_types[i]

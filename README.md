@@ -81,3 +81,10 @@ CTO-MBP\steve >> python3 cerebro-string-basic.py -s netapi32.dll -m all
         $netapi32dll_stackpushnull = "h.dll\x00hpi32hneta"
         $netapi32dll_stackpushdoublenull = "h.dll\x00\x00hpi32hneta"
 ```
+
+
+## TO DO
+
+- Add some simplified wildcard stack strings
+- Add functions for api hashing
+- Add shortened DLL and function name lists
