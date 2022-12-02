@@ -61,6 +61,20 @@ def make_hex_encoded_strings(thing):
     except:       
         print("Uh oh, something bad happened in hex encoding func.")
 
+def make_dec_encoded_strings(thing):
+    try:
+        if isinstance(thing,str):
+            s = thing
+            t = " "
+            dec_list = []
+            for i in s:
+                dec_not = ord(i)
+                dec_list.append(dec_not)
+            stringed_list = t.join(str(e) for e in dec_list)
+            return(stringed_list)
+    except:       
+        print("Uh oh, something bad happened in decimal encoding func.")
+
 def make_fallchill_strings(thing):
     # Lifted from https://lifars.com/wp-content/uploads/2021/09/Lazarus.pdf
     try:
@@ -103,7 +117,7 @@ def main_active(args = sys.argv[1:]):
     group.add_argument('-f','--file', type=argparse.FileType('r'), help='Single file to read.')
    
     #Mutation selection choices.
-    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','stackpush','reverse','fallchill','hex'], type=str, required=True)
+    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','stackpush','reverse','fallchill','hex', 'decimal'], type=str, required=True)
 
     args = parser.parse_args(args)
 
@@ -153,6 +167,15 @@ def main_active(args = sys.argv[1:]):
                 for line in args.file:
                     in_string = line.strip()
                     mutated_str = make_hex_encoded_strings(in_string)
+                    clean_str = re.sub('\W+','',line.strip())
+                    assemble_output(clean_str,mut_type,mutated_str)
+                    count +=1
+            elif mutation == "decimal":
+                mut_type = "_decimal"
+                count = 0
+                for line in args.file:
+                    in_string = line.strip()
+                    mutated_str = make_dec_encoded_strings(in_string)
                     clean_str = re.sub('\W+','',line.strip())
                     assemble_output(clean_str,mut_type,mutated_str)
                     count +=1
