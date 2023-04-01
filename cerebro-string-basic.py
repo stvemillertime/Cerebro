@@ -135,7 +135,18 @@ def make_frenchstack_strings(strval):
 
 # frenchstack stuff above courtesy of @notareverser https://gist.github.com/notareverser/4f6b9c644d4fe517889b3fbb0b4271ca
 
-  
+def make_rot13_strings(thing):
+    try: 
+        if isinstance(thing,str):
+            rot13 = str.maketrans(
+            'ABCDEFGHIJKLMabcdefghijklmNOPQRSTUVWXYZnopqrstuvwxyz',
+            'NOPQRSTUVWXYZnopqrstuvwxyzABCDEFGHIJKLMabcdefghijklm')
+            thing_rot13 = thing.translate(rot13)
+            return(thing_rot13)
+            # 'Uryyb Jbeyq!'
+    except:
+        print("Uh oh, something bad happened in rot13 func.")
+
 def make_flipflop_strings(thing):
     try:
         if isinstance(thing,str):
@@ -277,7 +288,7 @@ def main_active(args = sys.argv[1:]):
     group.add_argument('-s','--str', type=str, help='Single string to mutate.')
    
     # Mutation selection choices.
-    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','reverse','stackpush','stackpushnull','stackpushdoublenull','hex','decimal','movebp','fallchill','all','frenchstack'], type=str, required=True)
+    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','reverse','stackpush','stackpushnull','stackpushdoublenull','hex','decimal','movebp','rot13','fallchill','all','frenchstack'], type=str, required=True)
 
     args = parser.parse_args(args)
 
@@ -327,6 +338,10 @@ def main_active(args = sys.argv[1:]):
                     mut_type = "_hex_movebp"
                     mutated_str = make_hex_mov_epb(in_string)
                     assemble_output(clean_str,mut_type,mutated_str)
+                elif mutation == "rot13":
+                    mut_type = "_rot13"
+                    mutated_str = make_rot13_strings(in_string)
+                    assemble_output(clean_str,mut_type,mutated_str)
                 elif mutation == "frenchstack":
                     make_frenchstack_strings(in_string) #thank you @notareverser!
                 elif mutation == "all": #everything but frenchstack
@@ -339,10 +354,11 @@ def main_active(args = sys.argv[1:]):
                             make_stackpush_strings(in_string),
                             make_stackpush_nullterm(in_string),
                             make_stackpush_doublenullterm(in_string),
-                            make_hex_mov_epb(in_string)
+                            make_hex_mov_epb(in_string),
+                            make_rot13_strings(in_string)
                             #,make_frenchstack_strings(in_string)
                     ]
-                    mut_types = ["_flipflop","_reverse","_hex_enc_str","_decimal","_fallchill","_stackpush","_stackpushnull","_stackpushdoublenull","_hex_movebp"]
+                    mut_types = ["_flipflop","_reverse","_hex_enc_str","_decimal","_fallchill","_stackpush","_stackpushnull","_stackpushdoublenull","_hex_movebp","_rot13"]
                     i = 0
                     for f in funcs:
                         mut_type = mut_types[i]
