@@ -30,7 +30,11 @@ python3 cerebro-string-basic.py -s kernel32.dll -m frenchstack
 python3 cerebro-string-basic.py --str GetCurrentProcess --mut hex 
 python3 cerebro-string-basic.py -s IsDebuggerPresent --mut all
 
+
+Thanks to contributions from: @notareverser, @bitsofbinary, @glesnewich
 '''
+
+#### frenchstack
 
 # frenchstack stuff below courtesy of @notareverser https://gist.github.com/notareverser/4f6b9c644d4fe517889b3fbb0b4271ca
 
@@ -50,13 +54,10 @@ def strByDword(_strval):
         remainderVals.extend(bytearray([0]*(4-remainder)))
         yield struct.unpack("<L", remainderVals)[0]
 
-        
 def hexlify(v): return '{:x}'.format(v)
 def strToHex(strval): return ''.join(list(map(lambda k: '{:02x}'.format(ord(k)), strval)))
 def bufToHex(bval): return ''.join(list(map(lambda k: '{:02x}'.format(k), bval)))
 
-
-    
 def doPrototype(proto, _strval):
     strval = bytearray(_strval.encode())
     v = []
@@ -116,9 +117,9 @@ def fixName(strval):
 def make_frenchstack_strings(strval):
     nl = '\n'
     clauses = []
-    clauses.append("rule stackstring_{}".format(fixName(strval)))
+    clauses.append("rule ttp_mut_stack_french_{}".format(fixName(strval)))
     clauses.append("{")
-    clauses.append("  strings:")
+    clauses.append("\tstrings:")
     
     clauses.append(generateSmallStack(strval)+nl)
     clauses.append(generateLargeStack(strval)+nl)
@@ -127,13 +128,68 @@ def make_frenchstack_strings(strval):
     clauses.append(generatePushPop(strval)+nl)
     clauses.append(generateCallOverString(strval)+nl)
     
-    clauses.append("  condition:")
-    clauses.append("    any of them")
+    clauses.append("\tcondition:")
+    clauses.append("\t\tany of them")
     clauses.append("}")
     
     print(nl.join(clauses)+nl+nl)
 
-# frenchstack stuff above courtesy of @notareverser https://gist.github.com/notareverser/4f6b9c644d4fe517889b3fbb0b4271ca
+
+#### bobstack
+
+# bobstack stuff below courtesy of @bitsofbinary https://bitsofbinary.github.io/yara/2023/04/05/100daysofyara-day-95.html
+
+
+def make_bobstack_strings(thing):
+    try: 
+        if isinstance(thing,str):
+            api_name = thing
+            clean_str = re.sub('\W+','_',thing.strip())
+            one_byte_strs = []
+            two_byte_strs = []
+            four_byte_strs = []
+
+            for c in api_name:
+                ### subbing in a '_' for any special characters into the string identifier
+                clean_char = re.sub('\W+','_',c.strip())
+                hex_str = f"$one_byte_mov_{clean_char}_stack = {{C6 44 24 ?? {format(ord(c), 'x')}}}"
+                if hex_str not in one_byte_strs:
+                    one_byte_strs.append(hex_str)
+                    
+            for i in range(0, len(api_name)-1):
+                chars = api_name[i:i+2]
+                clean_chars = re.sub('\W+','_',chars.strip())
+                two_bytes = binascii.hexlify(chars.encode(), ' ').decode()
+                hex_str = f"$two_byte_mov_{clean_chars}_stack = {{66 C7 44 24 ?? {two_bytes}}}"
+                if hex_str not in two_byte_strs:
+                    two_byte_strs.append(hex_str)
+                    
+            for i in range(0, len(api_name)-3):
+                chars = api_name[i:i+4]
+                clean_chars = re.sub('\W+','_',chars.strip())
+                four_bytes = binascii.hexlify(chars.encode(), ' ').decode()
+                hex_str = f"$four_byte_mov_{clean_chars}_stack = {{C7 44 24 ?? {four_bytes}}}"
+                if hex_str not in four_byte_strs:
+                    four_byte_strs.append(hex_str)
+
+            print("rule ttp_mut_stack_bob_"+clean_str+" {")
+            print("\tstrings: ")
+            for string in one_byte_strs + two_byte_strs + four_byte_strs:
+                print("\t",string)
+            
+            print('''
+    condition:
+        for any of ($four_byte_*) : (
+            any of ($one_byte_*, $two_byte_*) at @+8
+        )
+}''')
+
+    except:
+        print("Uh oh, something bad happened in bobstack func")
+    
+
+
+#### 
 
 def make_rot13_strings(thing):
     try: 
@@ -288,7 +344,7 @@ def main_active(args = sys.argv[1:]):
     group.add_argument('-s','--str', type=str, help='Single string to mutate.')
    
     # Mutation selection choices.
-    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','reverse','stackpush','stackpushnull','stackpushdoublenull','hex','decimal','movebp','rot13','fallchill','all','frenchstack'], type=str, required=True)
+    parser.add_argument('-m','--mut','--mutation', choices=['flipflop','reverse','stackpush','stackpushnull','stackpushdoublenull','hex','decimal','movebp','rot13','fallchill','all','frenchstack','bobstack'], type=str, required=True)
 
     args = parser.parse_args(args)
 
@@ -342,9 +398,11 @@ def main_active(args = sys.argv[1:]):
                     mut_type = "_rot13"
                     mutated_str = make_rot13_strings(in_string)
                     assemble_output(clean_str,mut_type,mutated_str)
+                elif mutation == "bobstack":
+                    make_bobstack_strings(in_string) #thank you @bitsofbinary!
                 elif mutation == "frenchstack":
                     make_frenchstack_strings(in_string) #thank you @notareverser!
-                elif mutation == "all": #everything but frenchstack
+                elif mutation == "all": #everything *but* frenchstack / bobstack
                     funcs = [
                             make_flipflop_strings(in_string),
                             make_reverse_strings(in_string),
@@ -356,7 +414,6 @@ def main_active(args = sys.argv[1:]):
                             make_stackpush_doublenullterm(in_string),
                             make_hex_mov_epb(in_string),
                             make_rot13_strings(in_string)
-                            #,make_frenchstack_strings(in_string)
                     ]
                     mut_types = ["_flipflop","_reverse","_hex_enc_str","_decimal","_fallchill","_stackpush","_stackpushnull","_stackpushdoublenull","_hex_movebp","_rot13"]
                     i = 0
@@ -365,9 +422,12 @@ def main_active(args = sys.argv[1:]):
                         i+=1
                         mutated_str = f
                         assemble_output(clean_str,mut_type,mutated_str)
+                    #make_frenchstack_strings(in_string)
+                    #make_bobstack_strings(in_string)
+
                 else:
                     print("\nSomething bad happend with mutation selection.\n")
-                print("\n")
+                    print("\n")
             else:
                 print("\nError in mutations selection.\n")
 #### main main
